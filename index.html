@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark">
+    <title>首页</title>
+    <meta name="description" content="QingBlog - 基于 GitHub Issues 的自动化博客" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/css/QBLOG.css" />
+    <link rel="stylesheet" href="/css/font-awesome.min.css" />
+    <style>
+        header {
+            background: var(--hero-bg-color);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <section class="hero" aria-label="首页横幅">
+            <div class="hero__content">
+                <h1 id="hero-center-text"></h1>
+            </div>
+
+            <div class="hero__scroll-hint" aria-hidden="true">
+                <p>向下滑动</p>
+                <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+            </div>
+        </section>
+
+        <section class="card-list" aria-label="文章列表">
+            <ul class="card-list__items">
+
+            </ul>
+        </section>
+    </main>
+
+    <script src="/js/QBLOG.js"></script>
+</body>
+
+</html>
