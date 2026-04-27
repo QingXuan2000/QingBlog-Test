@@ -154,7 +154,7 @@ def _write_text(path: str, content: str) -> None:
 #
 # 负责加载环境变量、博客配置、页面配置等全局参数。
 class Config:
-    def __init__(self):
+    def __init__(self) -> None:
         self.WORKSPACE = (os.getenv("GITHUB_WORKSPACE") or os.getcwd()) + "/"
         self.BLOG_CONFIG_PATH = os.getenv(
             "BLOG_CONFIG_PATH", "blogData/blogConfig.json"
@@ -164,7 +164,7 @@ class Config:
         )
         self._load_configs()
 
-    def _load_configs(self):
+    def _load_configs(self) -> None:
         blog_config = self._load_json(self.BLOG_CONFIG_PATH)
         pages_config = self._load_json(self.PAGES_CONFIG_PATH)
 
@@ -249,6 +249,26 @@ class HTMLProcessor:
         self.path = path
         self.depth = _get_page_depth(path, workspace) if workspace else 0
         self.html = _read_text(path)
+        self._strip_merge_conflicts()
+
+    @staticmethod
+    def _strip_merge_conflict_markers(html: str) -> str:
+        """移除 Git 合并冲突标记（<<<<<<< / ======= / >>>>>>>），
+        避免在冲突状态下运行工作流时污染生成的 HTML。"""
+        import re
+
+        return re.sub(
+            r'^<<<<<<< .+\n|^=======\n|^>>>>>>> .+\n',
+            '',
+            html,
+            flags=re.MULTILINE,
+        )
+
+    def _strip_merge_conflicts(self) -> None:
+        cleaned = self._strip_merge_conflict_markers(self.html)
+        if len(cleaned) != len(self.html):
+            print(f"[警告] 文件 {self.path} 包含 Git 合并冲突标记，已自动清理")
+            self.html = cleaned
 
     def save(self) -> None:
         _write_text(self.path, self.html)
@@ -351,7 +371,7 @@ class HTMLProcessor:
 #
 # 负责维护页数、标签文章统计等运行态数据。
 class PagesConfigManager:
-    def __init__(self, cfg: Config):
+    def __init__(self, cfg: Config) -> None:
         self.cfg = cfg
 
     def update_max_article_page_num(self, total_pages: int) -> None:
@@ -399,7 +419,7 @@ class PagesConfigManager:
 # 列表分页管理（pages/）
 # =============================================================================
 class PageManager:
-    def __init__(self, workspace: str):
+    def __init__(self, workspace: str) -> None:
         self.workspace = workspace
         self.pages_dir = os.path.join(workspace, "pages")
         os.makedirs(self.pages_dir, exist_ok=True)
@@ -480,7 +500,7 @@ class PageManager:
 # 标签页管理（tags/）
 # =============================================================================
 class TagManager:
-    def __init__(self, workspace: str):
+    def __init__(self, workspace: str) -> None:
         self.workspace = workspace
         self.tags_dir = os.path.join(workspace, "tags")
 
@@ -582,7 +602,7 @@ def escape_special_chars(md: str) -> str:
     store = {}
     idx = 0
 
-    def save(m):
+    def save(m: re.Match[str]) -> str:
         nonlocal idx
         k = f"__FML{idx}__"
         store[k] = m.group(0)
@@ -639,7 +659,7 @@ def md_to_html(md: str) -> str:
 
 # 生成、删除、查询文章详情页
 class ArticleManager:
-    def __init__(self, workspace: str, cfg: Config = None):
+    def __init__(self, workspace: str, cfg: Optional[Config] = None) -> None:
         self.pages_dir = os.path.join(workspace, "article")
         self.cfg = cfg
         os.makedirs(self.pages_dir, exist_ok=True)
@@ -708,7 +728,7 @@ class ArticleManager:
 
 # 自动生成网站地图 sitemap.xml
 class SitemapGenerator:
-    def __init__(self, workspace: str, cfg: Config):
+    def __init__(self, workspace: str, cfg: Config) -> None:
         self.workspace = workspace
         self.cfg = cfg
 
@@ -813,7 +833,7 @@ class SitemapGenerator:
 
 # 生成 robots.txt
 class RobotsGenerator:
-    def __init__(self, workspace: str, cfg: Config):
+    def __init__(self, workspace: str, cfg: Config) -> None:
         self.workspace = workspace
         self.cfg = cfg
 
@@ -840,7 +860,7 @@ class RobotsGenerator:
 # 主流程调度
 # =============================================================================
 class BlogGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.cfg = Config()
         self.article = ArticleManager(self.cfg.WORKSPACE, self.cfg)
         self.tag = TagManager(self.cfg.WORKSPACE)
