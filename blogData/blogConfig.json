@@ -1,11 +1,11 @@
 {
     "blogInfo": {
-        "blogName": "博客名称（8字英文）",
+        "blogName": "QingTest",
         "yearOfWriting": 2025,
         "currentYear": 2026
     },
     "author": {
-        "targetAuthor": "你的GitHub名称",
+        "targetAuthor": "QingXuan2000",
         "introShort": "标语",
         "introDetail": "自我介绍",
         "socialMediaPlatform": {
