@@ -2,10 +2,13 @@
     "maxPageNum": {
         "maxArticlePageNum": 1,
         "maxTagPageNums": {
-            
+            "tag1": 1,
+            "tag2": 1
         }
     },
-    "tagsArtiAcleTotal": {
-        
+    "tagsArtiAcleTotal": {},
+    "tagsArticleTotal": {
+        "tag1": 1,
+        "tag2": 1
     }
 }
