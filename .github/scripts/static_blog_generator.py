@@ -60,9 +60,9 @@ ARTICLE_PAGE_TEMPLATE = (
     "<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"UTF-8\"/>"
     "<meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0\"/>"
     "<meta name=\"color-scheme\"content=\"light dark\">"
-    "<meta name=\"description\"content=\"{title} - QingBlog\"/>"
+    "<meta name=\"description\"content=\"{title}\"/>"
     "<link rel=\"shortcut icon\"href=\"{prefix}favicon.ico\"type=\"image/x-icon\"/>"
-    "<title></title>"
+    "<title>{title}</title>"
     "<link rel=\"stylesheet\"href=\"{prefix}css/blogArticle.css\">"
     "<link rel=\"stylesheet\"href=\"{prefix}css/QBLOG.css\"/>"
     "<link rel=\"stylesheet\"href=\"{prefix}css/font-awesome.min.css\"/>"
@@ -72,7 +72,7 @@ ARTICLE_PAGE_TEMPLATE = (
     "<div class=\"divider\"style=\"height:1px;width:100%;margin:1rem 0\"></div>"
     "<div class=\"card__content article-content\">{content_html}</div>"
     "<footer class=\"article-footer\">"
-    "<nav class=\"article-tag\" style=\"display: {'inline-block' if tags_html.strip() else 'none'};\" aria-label=\"文章标签\">"
+    "<nav class=\"article-tag\" style=\"display: {tag_display};\" aria-label=\"文章标签\">"
     "<span class=\"article-tag__label\">文章标签：</span>"
     "<ul class=\"article-tag__list\">{tags_html}</ul>"
     "</nav>"
@@ -690,12 +690,14 @@ class ArticleManager:
             pass
         is_update = self.exists(issue_id)
         tags = HTMLProcessor._gen_tags(labels, depth=1)
+        tag_display = "inline-block" if tags.strip() else "none"
         html = ARTICLE_PAGE_TEMPLATE.format(
             title=title,
             author=author,
             date=date,
             content_html=md_to_html(content),
             tags_html=tags,
+            tag_display=tag_display,
             prefix="../",
         )
         _write_text(self._path(issue_id), html)
