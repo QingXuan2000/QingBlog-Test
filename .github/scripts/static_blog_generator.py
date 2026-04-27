@@ -36,7 +36,7 @@ LIST_PAGE_TEMPLATE = (
     "<link rel=\"shortcut icon\"href=\"/favicon.ico\"type=\"image/x-icon\"/>"
     "<link rel=\"stylesheet\"href=\"/css/QBLOG.css\"/>"
     "<link rel=\"stylesheet\"href=\"/css/font-awesome.min.css\"/>"
-    "<style>.card-list{border-top:none}</style>"
+    "<style>.card-list{{border-top:none}}</style>"
     "</head><body><header id=\"title\"><h1></h1></header>"
     "<main class=\"card-list\"><ul class=\"card-list__items\"></ul></main>"
     "<script src=\"/js/QBLOG.js\"></script></body></html>"
@@ -50,7 +50,7 @@ TAG_PAGE_TEMPLATE = (
     "<link rel=\"shortcut icon\"href=\"/favicon.ico\"type=\"image/x-icon\"/>"
     "<link rel=\"stylesheet\"href=\"/css/QBLOG.css\">"
     "<link rel=\"stylesheet\"href=\"/css/font-awesome.min.css\">"
-    "<style>.card-list{border-top:none}</style>"
+    "<style>.card-list{{border-top:none}}</style>"
     "</head><body><header id=\"title\"><h1>{tag}</h1></header>"
     "<main class=\"card-list\"><ul class=\"card-list__items\"></ul></main>"
     "<script src=\"/js/QBLOG.js\"></script></body></html>"
@@ -79,13 +79,13 @@ ARTICLE_PAGE_TEMPLATE = (
     "</footer></article></main>"
     "<script src=\"/js/QBLOG.js\"></script>"
     "<script>\n"
-    "window.MathJax = {\n"
-    "  tex: {\n"
+    "window.MathJax = {{\n"
+    "  tex: {{\n"
     "    inlineMath: [['$','$'],['\\\\(','\\\\)']],\n"
     "    displayMath: [['$$','$$'],['\\\\[','\\\\]']]\n"
-    "  },\n"
-    "  chtml: { fontCache: 'global' }\n"
-    "};\n"
+    "  }},\n"
+    "  chtml: {{ fontCache: 'global' }}\n"
+    "}};\n"
     "</script>\n"
     "<script id=\"MathJax-script\" src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js\"></script>\n"
     "</body></html>"
@@ -155,7 +155,7 @@ def _write_text(path: str, content: str) -> None:
 # 负责加载环境变量、博客配置、页面配置等全局参数。
 class Config:
     def __init__(self):
-        self.WORKSPACE = os.getenv("GITHUB_WORKSPACE", "") + "/"
+        self.WORKSPACE = (os.getenv("GITHUB_WORKSPACE") or os.getcwd()) + "/"
         self.BLOG_CONFIG_PATH = os.getenv(
             "BLOG_CONFIG_PATH", "blogData/blogConfig.json"
         )
