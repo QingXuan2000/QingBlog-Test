@@ -32,7 +32,7 @@ LIST_PAGE_TEMPLATE = (
     "<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"UTF-8\"/>"
     "<meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0\"/>"
     "<meta name=\"color-scheme\"content=\"light dark\"><title></title>"
-    "<meta name=\"description\"content=\"QingBlog - 文章列表\"/>"
+    "<meta name=\"description\"content=\"文章列表\"/>"
     "<link rel=\"shortcut icon\"href=\"{prefix}favicon.ico\"type=\"image/x-icon\"/>"
     "<link rel=\"stylesheet\"href=\"{prefix}css/QBLOG.css\"/>"
     "<link rel=\"stylesheet\"href=\"{prefix}css/font-awesome.min.css\"/>"
@@ -46,7 +46,7 @@ TAG_PAGE_TEMPLATE = (
     "<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"UTF-8\"/>"
     "<meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0\"/>"
     "<meta name=\"color-scheme\"content=\"light dark\"><title></title>"
-    "<meta name=\"description\"content=\"QingBlog - {tag} 标签下的文章\"/>"
+    "<meta name=\"description\"content=\"{tag} 标签下的文章\"/>"
     "<link rel=\"shortcut icon\"href=\"{prefix}favicon.ico\"type=\"image/x-icon\"/>"
     "<link rel=\"stylesheet\"href=\"{prefix}css/QBLOG.css\">"
     "<link rel=\"stylesheet\"href=\"{prefix}css/font-awesome.min.css\">"
@@ -72,7 +72,7 @@ ARTICLE_PAGE_TEMPLATE = (
     "<div class=\"divider\"style=\"height:1px;width:100%;margin:1rem 0\"></div>"
     "<div class=\"card__content article-content\">{content_html}</div>"
     "<footer class=\"article-footer\">"
-    "<nav class=\"article-tag\" aria-label=\"文章标签\">"
+    "<nav class=\"article-tag\" style=\"display: {'inline-block' if tags_html.strip() else 'none'};\" aria-label=\"文章标签\">"
     "<span class=\"article-tag__label\">文章标签：</span>"
     "<ul class=\"article-tag__list\">{tags_html}</ul>"
     "</nav>"
@@ -249,26 +249,6 @@ class HTMLProcessor:
         self.path = path
         self.depth = _get_page_depth(path, workspace) if workspace else 0
         self.html = _read_text(path)
-        self._strip_merge_conflicts()
-
-    @staticmethod
-    def _strip_merge_conflict_markers(html: str) -> str:
-        """移除 Git 合并冲突标记（<<<<<<< / ======= / >>>>>>>），
-        避免在冲突状态下运行工作流时污染生成的 HTML。"""
-        import re
-
-        return re.sub(
-            r'^<<<<<<< .+\n|^=======\n|^>>>>>>> .+\n',
-            '',
-            html,
-            flags=re.MULTILINE,
-        )
-
-    def _strip_merge_conflicts(self) -> None:
-        cleaned = self._strip_merge_conflict_markers(self.html)
-        if len(cleaned) != len(self.html):
-            print(f"[警告] 文件 {self.path} 包含 Git 合并冲突标记，已自动清理")
-            self.html = cleaned
 
     def save(self) -> None:
         _write_text(self.path, self.html)
