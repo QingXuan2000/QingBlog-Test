@@ -87,7 +87,7 @@ ARTICLE_PAGE_TEMPLATE: str = (
     "  chtml: {{ fontCache: 'global' }}\n"
     "}};\n"
     "</script>\n"
-    "<script id=\"MathJax-script\" src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js\"></script>\n"
+    "<script id=\"MathJax-script\" src=\"{prefix}js/tex-mml-chtml.js\"></script>\n"
     "</body></html>"
 )
 
@@ -224,10 +224,6 @@ def truncate(text: str, max_len: int = 150) -> str:
     return text[:max_len] + "..." if len(text) > max_len else text
 
 
-# 生成文章链接（列表页卡片跳转）
-def get_link(target_id: str, depth: int = 0) -> str:
-    prefix = "../" * depth
-    return f"{prefix}article/{target_id}.html"
 
 
 # 计算页面深度的工具函数
@@ -252,8 +248,8 @@ class HTMLProcessor:
         _write_text(self.path, self.html)
 
     def find_card(self, issue_id: str) -> Optional[Tuple[int, int]]:
-        link = get_link(issue_id, self.depth)
-        start = self.html.find(f'<a href="{link}">')
+        onclick = f"qingBlogInstance.navigation('/article/{issue_id}.html')"
+        start = self.html.find(onclick)
         if start != -1:
             li_start = self.html.rfind(CARD_LI_PREFIX, 0, start)
             li_end = self.html.find(CARD_LI_SUFFIX, start)
@@ -273,12 +269,11 @@ class HTMLProcessor:
     @staticmethod
     def gen_tags(labels: List[str], depth: int = 0) -> str:
         items: list[str] = []
-        prefix = "../" * depth
         for l in labels[:3]:
-            href = f"{prefix}tags/{l}/"
             items.append(
                 "<li class=\"article-tag__list-item\">"
-                f"<a class=\"article-tag__item\" href=\"{href}\">"
+                "<a class=\"article-tag__item\" href=\"#\" "
+                f"onclick=\"window.qingBlogInstance.navigation('/tags/{l}/')\">"
                 f"<span>{l}</span>"
                 "</a>"
                 "</li>"
@@ -288,9 +283,10 @@ class HTMLProcessor:
     def _gen_card(
         self, title: str, date: str, content: str, issue_id: str, labels: List[str]
     ) -> str:
-        link, tags = get_link(issue_id, self.depth), self.gen_tags(labels, self.depth)
+        tags = self.gen_tags(labels, self.depth)
         return (
-            f"<li><article class=\"card\"><a href=\"{link}\">"
+            f"<li><article class=\"card\"><a href=\"#\" "
+            f"onclick=\"window.qingBlogInstance.navigation('/article/{issue_id}.html')\">"
             f"<header class=\"card__header\"><h2>{title}</h2></header>"
             "<div class=\"divider\"style=\"height:1px;width:100%;margin:1rem 0\"></div>"
             f"<p>{content}</p>"
@@ -306,10 +302,7 @@ class HTMLProcessor:
         )
 
     def count_cards(self) -> int:
-        # 兼容历史结构 <li><a ...> 与当前结构 <li><article ...><a ...>
-        count_article = self.html.count('<article class="card">')
-        count_legacy = self.html.count('<li><a href="')
-        return max(count_article, count_legacy)
+        return self.html.count('<article class="card">')
 
     def add_or_update(
         self,

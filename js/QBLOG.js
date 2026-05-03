@@ -52,7 +52,6 @@ class QingBlog {
       // 初始化各个功能模块
       this.initLoadingAnimation();
       this.setNavHeightVariable();
-      this.initContextMenuEvent();
       this.toggleTheme();
       this.initBackToTop();
       this.initSidebar();
@@ -67,6 +66,7 @@ class QingBlog {
       this.addTagToPages();
       this.initMeData();
       this.addAboutCard();
+      this.initFriendLinks();
 
       // 绑定窗口resize事件
       window.addEventListener("resize", this.debounceSetNavHeight);
@@ -180,7 +180,6 @@ class QingBlog {
 
   // ========== 公共组件渲染 ==========
   dynamicComponentBox() {
-    const base = this._getBase();
     const pathSegments = window.location.pathname.split("/").filter(Boolean);
     const pageName = pathSegments[0];
     const needPaginationPages = ["", "index.html", "article", "pages", "tags"];
@@ -204,25 +203,19 @@ class QingBlog {
           <div id="alert-message"><span></span></div>
       </div>
       <div class="overlay" aria-hidden="true"></div>
-      <nav id="context-menu" class="context-menu" aria-label="右键菜单">
-          <ul>
-              <li><button type="button" data-action="copy" aria-label="复制选中内容"><i class="fa fa-copy"></i> 复制</button></li>
-              <li class="divider" role="separator"></li>
-              <li><button type="button" data-action="refresh" aria-label="刷新页面"><i class="fa fa-refresh"></i>&nbsp;<span>刷新</span></button></li>
-          </ul>
-      </nav>
-      <button id="back-to-top" aria-label="返回顶部"><i class="fa fa-chevron-up"></i></button>
+      <button id="back-to-top" aria-label="返回顶部"><i class="fa fa-angle-up" aria-hidden="true"></i></button>
       <header id="page-header">
           <nav id="navbar" aria-label="主导航">
               ${this.resizeLogo(35, 35)}
               <div id="navbar-title" aria-label="博客名称">${this.blogConfig.blogInfo.blogName}</div>
               <div class="divider" style="width: 2px; margin: 0 0.5rem 0 1rem; border-radius: 100em;" aria-hidden="true"></div>
               <ul>
-                  <li><a href="${base}/"><i class="fa fa-home" aria-hidden="true"></i>&nbsp;首页</a></li>
-                  <li><a href="${base}/article/"><i class="fa fa-book" aria-hidden="true"></i>&nbsp;文章</a></li>
-                  <li><a href="${base}/tags/"><i class="fa fa-tags" aria-hidden="true"></i>&nbsp;标签</a></li>
-                  <li><a href="${base}/data/"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
-                  <li><a href="${base}/about/"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/')"><i class="fa fa-home" aria-hidden="true"></i>&nbsp;首页</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/article/')"><i class="fa fa-book" aria-hidden="true"></i>&nbsp;文章</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/tags/')"><i class="fa fa-tags" aria-hidden="true"></i>&nbsp;标签</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/data/')"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/about/')"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
               </ul>
           </nav>
           <button id="theme-toggle" aria-label="切换主题"><i class="fa fa-sun-o"></i></button>
@@ -237,21 +230,23 @@ class QingBlog {
           <div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div>
           <div id="sidebar-content" class="sidebar__content">
               <div class="sidebar__user-info">
-                  <img id="sidebar-avatar" src="${base}/img/Avatar.png" alt="作者头像" />
+                  <img id="sidebar-avatar" src="../../../../img/Avatar.png" alt="作者头像" />
                   <h2 id="user-name" class="sidebar__user-name">${this.blogConfig.author.targetAuthor}</h2>
                   <p class="sidebar__motto">${this.blogConfig.author.introShort}</p>
               </div>
               <nav aria-label="侧边栏导航">
                   <ul>
-                      <li><a href="${base}/"><i class="fa fa-home" aria-hidden="true"></i>&nbsp;首页</a></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/')"><i class="fa fa-home" aria-hidden="true"></i>&nbsp;首页</a></li>
                       <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
-                      <li><a href="${base}/article/"><i class="fa fa-book" aria-hidden="true"></i>&nbsp;文章</a></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/article/')"><i class="fa fa-book" aria-hidden="true"></i>&nbsp;文章</a></li>
                       <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
-                      <li><a href="${base}/tags/"><i class="fa fa-tags" aria-hidden="true"></i>&nbsp;标签</a></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/tags/')"><i class="fa fa-tags" aria-hidden="true"></i>&nbsp;标签</a></li>
                       <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
-                      <li><a href="${base}/data/"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/data/')"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
                       <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
-                      <li><a href="${base}/about/"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/about/')"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+                      <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
                   </ul>
               </nav>
               <div class="sidebar__social">
@@ -278,11 +273,12 @@ class QingBlog {
         <nav class="footer__section footer__links" aria-label="页脚导航">
           <h3>快速链接</h3>
           <ul>
-            <li><a href="${base}/"><i class="fa fa-home"></i>&nbsp;首页</a></li>
-            <li><a href="${base}/article/"><i class="fa fa-book"></i>&nbsp;文章</a></li>
-            <li><a href="${base}/tags/"><i class="fa fa-tags"></i>&nbsp;标签</a></li>
-            <li><a href="${base}/data/"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
-            <li><a href="${base}/about/"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/')"><i class="fa fa-home"></i>&nbsp;首页</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/article/')"><i class="fa fa-book"></i>&nbsp;文章</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/tags/')"><i class="fa fa-tags"></i>&nbsp;标签</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/data/')"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/about/')"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
           </ul>
         </nav>
         <div class="footer__section footer__social">
@@ -545,7 +541,7 @@ class QingBlog {
 
     const handleScroll = this.throttle(() => {
       const navHeight = this.setNavHeightVariable();
-      header.style.background = window.scrollY > (navHeight + navHeight) ? "none" : "var(--hero-bg-color)";
+      header.style.background = window.scrollY > (navHeight * 2) ? "none" : "var(--hero-bg-color)";
     });
 
     window.addEventListener("scroll", handleScroll);
@@ -567,7 +563,6 @@ class QingBlog {
   addTagToPages() {
     if (!document.getElementById("tags-wrapper")) return;
 
-    const base = this._getBase();
     const tagCloud = document.querySelector(".tag-cloud");
 
     const tagList = [];
@@ -575,7 +570,7 @@ class QingBlog {
     Object.entries(this.pagesConfig.tagsArticleTotal).forEach(([tagName, tagInArticleTotal]) => {
       tagList.push(`
         <li>
-          <a href="${base}/tags/${tagName}/" class="tag-cloud__item">
+          <a href="#" onclick="window.qingBlogInstance.navigation('/tags/${tagName}/')" class="tag-cloud__item">
             <span class="tag-cloud__name">${tagName}</span>
             <span class="tag-cloud__count">${tagInArticleTotal}</span>
           </a>
@@ -586,82 +581,7 @@ class QingBlog {
   }
 
   navigateToTagPage(tagText) {
-    location.href = `${this._getBase()}/tags/${encodeURIComponent(tagText)}/`;
-  }
-
-  // ========== 自定义右键菜单 ==========
-  initContextMenuEvent() {
-    const menu = document.getElementById("context-menu");
-    if (!menu) return;
-
-    menu.addEventListener("click", (e) => {
-      const button = e.target.closest("[data-action]");
-      if (!button) return;
-      const action = button.dataset.action;
-      this.initContextMenu(action);
-    });
-
-    const showContextMenu = () => {
-      menu.style.display = "block";
-      menu.classList.add("context-menu--visible");
-    };
-
-    document.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      showContextMenu();
-
-      const menuWidth = menu.offsetWidth;
-      const menuHeight = menu.offsetHeight;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      let x = e.clientX;
-      let y = e.clientY;
-
-      if (x + menuWidth > viewportWidth) x = viewportWidth - menuWidth - 10;
-      if (y + menuHeight > viewportHeight) y = viewportHeight - menuHeight - 10;
-
-      menu.style.left = x + "px";
-      menu.style.top = y + "px";
-    });
-
-    document.addEventListener("click", () => this.hideContextMenu());
-    const handleScroll = this.throttle(() => this.hideContextMenu());
-    window.addEventListener("scroll", handleScroll);
-
-    this.addCleanTask(() => {
-      document.removeEventListener("click", () => this.hideContextMenu());
-      window.removeEventListener("scroll", handleScroll);
-    });
-  }
-
-  hideContextMenu() {
-    const menu = document.getElementById("context-menu");
-    if (!menu) return;
-    menu.classList.remove("context-menu--visible");
-    setTimeout(() => { menu.style.display = "none"; }, 200);
-  }
-
-  initContextMenu(option) {
-    if (option === "copy") {
-      (async () => {
-        try {
-          const userSelectedText = window.getSelection().toString().trim();
-          if (!userSelectedText) {
-            this.hideContextMenu();
-            return this.showAlert("orange", "<i class=\"fa fa-warning\" aria-hidden=\"true\"></i>&nbsp;未选中任何内容！");
-          }
-          await navigator.clipboard.writeText(userSelectedText);
-          this.hideContextMenu();
-          this.showAlert("green", "<i class=\"fa fa-check-square-o\" aria-hidden=\"true\"></i>&nbsp;复制成功！");
-        } catch (error) {
-          console.error("复制失败：", error);
-          this.hideContextMenu();
-          this.showAlert("red", "<i class=\"fa fa-times-circle-o\" aria-hidden=\"true\"></i>&nbsp;复制失败，请重试！");
-        }
-      })();
-    } else if (option === "refresh") {
-      location.reload(true);
-    }
+    this.navigation(`/tags/${encodeURIComponent(tagText)}/`);
   }
 
   // ========== 分页 ==========
@@ -673,7 +593,6 @@ class QingBlog {
     const inputPageNum = document.getElementById("input-page-num");
     if (!prevTrigger || !nextTrigger || !pageNum) return;
 
-    const base = this._getBase();
     const path = window.location.pathname;
     const isTagPage = path.startsWith("/tags/");
     let current = 1;
@@ -703,9 +622,9 @@ class QingBlog {
     }
 
     const goToPage = (page) => {
-      window.location.href = isTagPage
-        ? (page === 1 ? `${base}/tags/${encodeURIComponent(tagName)}/` : `${base}/tags/${encodeURIComponent(tagName)}/${page}.html`)
-        : (page === 1 ? base : `${base}/pages/${page}.html`);
+      this.navigation(isTagPage
+        ? (page === 1 ? `/tags/${encodeURIComponent(tagName)}/` : `/tags/${encodeURIComponent(tagName)}/${page}.html`)
+        : (page === 1 ? `/` : `/pages/${page}.html`));
     };
 
     const updatePageDisplay = () => {
@@ -927,6 +846,61 @@ class QingBlog {
 
       card.querySelector(".card__footer").insertAdjacentHTML("beforeend", `<p>写作年限：${blogInfo.yearOfWriting} – ${blogInfo.currentYear}</p>`);
     });
+  }
+
+  // ========== 友情链接 ==========
+  initFriendLinks() {
+    const friendLinksDom = document.querySelector(".friend-links__grid");
+
+    if (!friendLinksDom || !this.blogConfig.friendLinks) return;
+
+    const friendLinksHtml = [];
+
+    this.blogConfig.friendLinks.forEach((link) => {
+      friendLinksHtml.push(`
+        <div>
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="friend-links__card">
+            <div class="friend-links__card-icon" aria-hidden="true">
+              ${link.icon}
+            </div>
+            <div class="friend-links__card-info">
+              <h3 class="friend-links__card-name">${link.name}</h3>
+              <p class="friend-links__card-desc">${link.description}</p>
+            </div>
+            <span class="sr-only">新窗口打开</span>
+          </a>
+        </div>
+        `);
+    });
+
+    friendLinksDom.innerHTML = friendLinksHtml.join('');
+  }
+
+  getAbsolutePath(href) {
+    const webOrigin = location.origin;
+    const webHost = location.host;
+    const repositoryName = this.blogConfig.blogInfo.repositoryName;
+
+    if (!href) throw new Error("未传入参数！");
+
+    if (repositoryName === webHost) {
+      return href;
+    } else {
+      return `${repositoryName}${href}`;
+    }
+  }
+
+  navigation(href) {
+    const webHost = location.host;
+    const repositoryName = this.blogConfig.blogInfo.repositoryName;
+
+    if (!href) throw new Error("未传入参数，请传入如/pages的参数！");
+
+    if (repositoryName === webHost) {
+      location.pathname = this.getAbsolutePath(href);
+    } else {
+      location.pathname = this.getAbsolutePath(href);
+    }
   }
 
 }
