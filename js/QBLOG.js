@@ -52,7 +52,7 @@ class QingBlog {
       // 初始化各个功能模块
       this.initLoadingAnimation();
       this.setNavHeightVariable();
-      this.toggleTheme();
+      this.initThemeModal();
       this.initBackToTop();
       this.initSidebar();
       this.initWebTitle();
@@ -66,6 +66,7 @@ class QingBlog {
       this.addTagToPages();
       this.initMeData();
       this.addAboutCard();
+      this.initFriendLinks();
       this.initFriendLinks();
 
       // 绑定窗口resize事件
@@ -87,7 +88,7 @@ class QingBlog {
     const parts = cleaned.split("/").filter(Boolean);
     const last = parts[parts.length - 1];
     const depth = last && last.includes(".") ? parts.length - 1 : parts.length;
-    return depth > 0 ? "../".repeat(depth) : ".";
+    return depth > 0 ? "../".repeat(depth) : "./";
   }
 
   async loadConfigs() {
@@ -204,6 +205,7 @@ class QingBlog {
       </div>
       <div class="overlay" aria-hidden="true"></div>
       <button id="back-to-top" aria-label="返回顶部"><i class="fa fa-angle-up" aria-hidden="true"></i></button>
+      <button id="back-to-top" aria-label="返回顶部"><i class="fa fa-angle-up" aria-hidden="true"></i></button>
       <header id="page-header">
           <nav id="navbar" aria-label="主导航">
               ${this.resizeLogo(35, 35)}
@@ -216,9 +218,10 @@ class QingBlog {
                   <li><a href="#" onclick="window.qingBlogInstance.navigation('/data/')"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
                   <li><a href="#" onclick="window.qingBlogInstance.navigation('/about/')"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
                   <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
+                  <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
               </ul>
           </nav>
-          <button id="theme-toggle" aria-label="切换主题"><i class="fa fa-sun-o"></i></button>
+          <button id="theme-toggle" aria-label="选择主题"><i class="fa fa-paint-brush"></i></button>
           <button id="sidebar-toggle" aria-label="打开侧边栏"><i class="fa fa-bars" aria-hidden="true"></i></button>
       </header>
       <aside id="sidebar" aria-label="侧边栏导航">
@@ -230,7 +233,7 @@ class QingBlog {
           <div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div>
           <div id="sidebar-content" class="sidebar__content">
               <div class="sidebar__user-info">
-                  <img id="sidebar-avatar" src="../../../../img/Avatar.png" alt="作者头像" />
+                  <img id="sidebar-avatar" src="${base}img/Avatar.png" alt="作者头像" />
                   <h2 id="user-name" class="sidebar__user-name">${this.blogConfig.author.targetAuthor}</h2>
                   <p class="sidebar__motto">${this.blogConfig.author.introShort}</p>
               </div>
@@ -247,6 +250,8 @@ class QingBlog {
                       <li><a href="#" onclick="window.qingBlogInstance.navigation('/about/')"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
                       <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
                       <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
+                      <li class="sidebar__nav-divider" role="separator"><div class="sidebar__header-divider divider" style="width: 100%; height: 1px;" aria-hidden="true"></div></li>
+                      <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
                   </ul>
               </nav>
               <div class="sidebar__social">
@@ -259,6 +264,18 @@ class QingBlog {
               <p>${copyrightText}</p>
           </div>
       </aside>
+      <!-- 主题选择弹窗 -->
+      <div class="theme-modal-overlay" id="theme-modal-overlay" aria-hidden="true"></div>
+      <div id="theme-modal" aria-label="选择主题" role="dialog" aria-modal="true">
+          <div id="theme-modal-header">
+              <h2><i class="fa fa-paint-brush"></i>&nbsp;&nbsp;选择主题</h2>
+              <button id="theme-modal-close" aria-label="关闭主题选择">
+                  <i class="fa fa-remove" aria-hidden="true"></i>
+              </button>
+          </div>
+          <div class="theme-modal__divider" aria-hidden="true"></div>
+          <div id="theme-modal-grid"></div>
+      </div>
     `;
 
     // 页脚组件
@@ -278,6 +295,7 @@ class QingBlog {
             <li><a href="#" onclick="window.qingBlogInstance.navigation('/tags/')"><i class="fa fa-tags"></i>&nbsp;标签</a></li>
             <li><a href="#" onclick="window.qingBlogInstance.navigation('/data/')"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;文章数据</a></li>
             <li><a href="#" onclick="window.qingBlogInstance.navigation('/about/')"><i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;关于我</a></li>
+            <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
             <li><a href="#" onclick="window.qingBlogInstance.navigation('/links/')"><i class="fa fa-link" aria-hidden="true"></i>&nbsp;友情链接</a></li>
           </ul>
         </nav>
@@ -331,81 +349,199 @@ class QingBlog {
 
   // ========== 加载动画 ==========
   initLoadingAnimation() {
-    const firstLoading = localStorage.getItem("firstLoading") || "true";
     const loadingContainer = document.querySelector(".loading");
     if (!loadingContainer) return;
 
+    // URL参数 ?skipLoading=true 时跳过动画（页面间跳转）
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("skipLoading")) {
+      loadingContainer.style.display = "none";
+      // 清除 URL 参数，保持地址栏整洁
+      history.replaceState(null, "", window.location.pathname + window.location.hash);
+      return;
+    }
+
+    const showAlways = this.blogConfig?.buildConfig?.showLoadingAnimation;
+
+    // showLoadingAnimation = false：直接隐藏，从不显示动画
+    if (showAlways === false) {
+      loadingContainer.style.display = "none";
+      return;
+    }
+
+    // showLoadingAnimation = true：每次加载都显示动画
+    if (showAlways === true) {
+      this._playLoadingAnimation(loadingContainer);
+      return;
+    }
+
+    // 未配置时向后兼容：仅首次访问显示动画
+    const firstLoading = localStorage.getItem("firstLoading") || "true";
     if (firstLoading !== "false") {
-      const qingBlogIcon = document.querySelector(".loading__graphic");
-      const loadingDivs = document.querySelectorAll(".loading__bar");
-      this.body.style.overflow = "hidden";
-
-      const hideTimer = setTimeout(() => {
-        loadingDivs.forEach((div, index) => {
-          div.style.animation = (index + 1) % 2 === 0 ? "loadingRightAnimation 1.5s ease-out forwards" : "loadingLeftAnimation 1.5s ease-out forwards";
-        });
-        qingBlogIcon.style.animation = "hideOverlayAnimation 0.5s ease-in-out forwards";
-      }, 1600);
-
-      const removeTimer = setTimeout(() => {
-        loadingContainer.style.display = "none";
-        this.body.style.overflow = "auto";
-        localStorage.setItem("firstLoading", "false");
-      }, 3000);
-
-      this.addCleanTask(() => {
-        clearTimeout(hideTimer);
-        clearTimeout(removeTimer);
-      });
+      this._playLoadingAnimation(loadingContainer);
+      localStorage.setItem("firstLoading", "false");
     } else {
       loadingContainer.style.display = "none";
     }
   }
 
+  _playLoadingAnimation(loadingContainer) {
+    const qingBlogIcon = document.querySelector(".loading__graphic");
+    const loadingDivs = document.querySelectorAll(".loading__bar");
+    this.body.style.overflow = "hidden";
+
+    const hideTimer = setTimeout(() => {
+      loadingDivs.forEach((div, index) => {
+        div.style.animation = (index + 1) % 2 === 0 ? "loadingRightAnimation 1.5s ease-out forwards" : "loadingLeftAnimation 1.5s ease-out forwards";
+      });
+      qingBlogIcon.style.animation = "hideOverlayAnimation 0.5s ease-in-out forwards";
+    }, 1600);
+
+    const removeTimer = setTimeout(() => {
+      loadingContainer.style.display = "none";
+      this.body.style.overflow = "auto";
+    }, 3000);
+
+    this.addCleanTask(() => {
+      clearTimeout(hideTimer);
+      clearTimeout(removeTimer);
+    });
+  }
+
   // ========== 主题切换 ==========
-  toggleTheme() {
+  initThemeModal() {
     const toggleBtn = document.getElementById("theme-toggle");
     const systemThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+    const overlay = document.getElementById("theme-modal-overlay");
+    const modal = document.getElementById("theme-modal");
+    const closeBtn = document.getElementById("theme-modal-close");
+    const grid = document.getElementById("theme-modal-grid");
+
+    if (!toggleBtn || !overlay || !modal || !closeBtn || !grid) return;
+
+    const themeModal = new Modal(overlay, modal);
+
+    const getValidTheme = (theme) => {
+      if (theme && this.themes[theme]) return theme;
+      return (systemThemeMedia.matches && this.themes["深色主题"]) ? "深色主题" : "浅色主题";
+    };
 
     const applyTheme = (theme) => {
       Object.entries(this.themes[theme]).forEach(([key, value]) => {
+        if (key === "swatch") return;
         this.root.style.setProperty(key, value);
       });
     };
 
-    const getThemeIcon = (theme) => theme === "dark" ? "moon" : "sun";
-
     const setTheme = (theme) => {
       applyTheme(theme);
       localStorage.setItem("theme", theme);
-      toggleBtn.innerHTML = `<i class="fa fa-${getThemeIcon(theme)}-o"></i>`;
+      const cards = grid.querySelectorAll(".theme-card");
+      cards.forEach((card) => {
+        card.classList.toggle("theme-card--active", card.dataset.theme === theme);
+      });
     };
 
     const initTheme = () => {
       const savedTheme = localStorage.getItem("theme");
-      const defaultTheme = savedTheme || (systemThemeMedia.matches ? "dark" : "light");
-      applyTheme(defaultTheme);
-      toggleBtn.innerHTML = `<i class="fa fa-${getThemeIcon(defaultTheme)}-o"></i>`;
+      applyTheme(getValidTheme(savedTheme));
     };
 
     const handleSystemThemeChange = (e) => {
       if (!localStorage.getItem("theme")) {
-        const newTheme = e.matches ? "dark" : "light";
-        setTheme(newTheme);
+        setTheme(e.matches ? "深色主题" : "浅色主题");
       }
     };
+
+    const refreshCardHighlight = () => {
+      const isSystem = !localStorage.getItem("theme");
+      const currentTheme = isSystem ? null : getValidTheme(localStorage.getItem("theme"));
+      const cards = grid.querySelectorAll(".theme-card");
+      cards.forEach((card) => {
+        if (isSystem) {
+          card.classList.toggle("theme-card--active", card.dataset.theme === "system");
+        } else {
+          card.classList.toggle("theme-card--active", card.dataset.theme === currentTheme);
+        }
+      });
+    };
+
+    // 模态框开关
+    const showModal = () => {
+      const sidebar = document.getElementById("sidebar");
+      if (sidebar && sidebar.style.display === "flex") {
+        document.querySelector(".overlay")?.click();
+      }
+      refreshCardHighlight();
+      themeModal.show();
+    };
+
+    const hideModal = () => themeModal.hide();
+
+    // 渲染主题卡片
+    const renderThemeCards = () => {
+      const isSystem = !localStorage.getItem("theme");
+
+      const systemCard = `
+        <div class="theme-card${isSystem ? " theme-card--active" : ""}" data-theme="system" role="button" tabindex="0" aria-label="跟随系统">
+          <div class="theme-card__swatch theme-card__swatch--system" aria-hidden="true">
+            <i class="fa fa-desktop" aria-hidden="true"></i>
+          </div>
+          <span class="theme-card__name">跟随系统</span>
+          <div class="theme-card__status" aria-hidden="true"><i class="fa fa-check"></i></div>
+        </div>
+      `;
+
+      const cardsHtml = Object.entries(this.themes).map(([key, theme]) => {
+        const swatchPrimary = theme.swatch?.primary || "transparent";
+        const swatchSecondary = theme.swatch?.secondary || "transparent";
+        const swatchTertiary = theme.swatch?.tertiary || "transparent";
+        const isActive = !isSystem && key === getValidTheme(localStorage.getItem("theme"));
+
+        return `
+          <div class="theme-card${isActive ? " theme-card--active" : ""}" data-theme="${key}" role="button" tabindex="0" aria-label="切换到${key}">
+            <div class="theme-card__swatch" aria-hidden="true">
+              <div class="theme-card__swatch-primary" style="background: ${swatchPrimary};"></div>
+              <div class="theme-card__swatch-secondary" style="background: ${swatchSecondary};"></div>
+              <div class="theme-card__swatch-tertiary" style="background: ${swatchTertiary};"></div>
+            </div>
+            <span class="theme-card__name">${key}</span>
+            <div class="theme-card__status" aria-hidden="true"><i class="fa fa-check"></i></div>
+          </div>
+        `;
+      }).join("");
+
+      grid.innerHTML = systemCard + cardsHtml;
+
+      grid.addEventListener("click", (e) => {
+        const card = e.target.closest(".theme-card");
+        if (!card) return;
+        const theme = card.dataset.theme;
+        if (!theme) return;
+
+        if (theme === "system") {
+          localStorage.removeItem("theme");
+          applyTheme(getValidTheme(null));
+          hideModal();
+          this.showAlert("green", '<i class="fa fa-laptop"></i>&nbsp;已跟随系统主题');
+        } else {
+          if (!this.themes[theme]) return;
+          setTheme(theme);
+          hideModal();
+          this.showAlert("green", `<i class="fa fa-check-circle-o"></i>&nbsp;已切换到${theme}！`);
+        }
+      });
+    };
+
+    // --- 初始化 ---
+    initTheme();
+    renderThemeCards();
 
     systemThemeMedia.addEventListener("change", handleSystemThemeChange);
     this.addCleanTask(() => systemThemeMedia.removeEventListener("change", handleSystemThemeChange));
 
-    initTheme();
-
-    toggleBtn.addEventListener("click", () => {
-      const currentTheme = localStorage.getItem("theme") || (systemThemeMedia.matches ? "dark" : "light");
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      setTheme(newTheme);
-      this.showAlert("green", `<i class="fa fa-${getThemeIcon(newTheme)}-o"></i>&nbsp;已切换到${newTheme === "light" ? "浅色" : "深色"}主题！`);
-    });
+    toggleBtn.addEventListener("click", showModal);
+    closeBtn.addEventListener("click", hideModal);
   }
 
   // ========== 回到顶部 ==========
@@ -418,11 +554,12 @@ class QingBlog {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    const handleScroll = this.throttle(() => {
+    const handleScroll = () => {
       backToTopBtn.style.visibility = window.scrollY > 0 ? "visible" : "hidden";
-    });
+    };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
     this.addCleanTask(() => window.removeEventListener("scroll", handleScroll));
   }
 
@@ -543,6 +680,8 @@ class QingBlog {
       const navHeight = this.setNavHeightVariable();
       header.style.background = window.scrollY > (navHeight * 2) ? "none" : "var(--hero-bg-color)";
     });
+
+    handleScroll();
 
     window.addEventListener("scroll", handleScroll);
     this.addCleanTask(() => window.removeEventListener("scroll", handleScroll));
@@ -877,7 +1016,6 @@ class QingBlog {
   }
 
   getAbsolutePath(href) {
-    const webOrigin = location.origin;
     const webHost = location.host;
     const repositoryName = this.blogConfig.blogInfo.repositoryName;
 
@@ -891,18 +1029,62 @@ class QingBlog {
   }
 
   navigation(href) {
-    const webHost = location.host;
-    const repositoryName = this.blogConfig.blogInfo.repositoryName;
-
     if (!href) throw new Error("未传入参数，请传入如/pages的参数！");
 
-    if (repositoryName === webHost) {
-      location.pathname = this.getAbsolutePath(href);
-    } else {
-      location.pathname = this.getAbsolutePath(href);
-    }
+    const base = this.getAbsolutePath(href);
+    // 页面间跳转添加 skipLoading 参数，使目标页跳过加载动画
+    location.href = base + (base.includes("?") ? "&" : "?") + "skipLoading=true";
   }
 
+}
+
+// ========== 可复用模态框组件 ==========
+class Modal {
+  constructor(overlay, panel, { panelShowAnim = "showThemeModalAnimation", panelHideAnim = "hideThemeModalAnimation" } = {}) {
+    this.overlay = overlay;
+    this.panel = panel;
+    this.panelShowAnim = panelShowAnim;
+    this.panelHideAnim = panelHideAnim;
+    this._isOpen = false;
+    this._duration = 400;
+
+    overlay.addEventListener("click", () => this.hide());
+    panel.addEventListener("click", (e) => e.stopPropagation());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this._isOpen) this.hide();
+    });
+  }
+
+  show() {
+    if (this._isOpen) return;
+    this._isOpen = true;
+
+    this.overlay.style.animation = "none";
+    this.panel.style.animation = "none";
+    void this.overlay.offsetHeight;
+
+    this.overlay.style.display = "block";
+    this.panel.style.display = "flex";
+    this.overlay.style.animation = `showOverlayAnimation ${this._duration}ms forwards`;
+    this.panel.style.animation = `${this.panelShowAnim} ${this._duration}ms cubic-bezier(0.0, 0.0, 0.2, 1) forwards`;
+    document.body.style.overflow = "hidden";
+  }
+
+  hide() {
+    if (!this._isOpen) return;
+
+    this.overlay.style.animation = "none";
+    this.panel.style.animation = "none";
+    void this.overlay.offsetHeight;
+    this.overlay.style.animation = `hideOverlayAnimation ${this._duration}ms forwards`;
+    this.panel.style.animation = `${this.panelHideAnim} ${this._duration}ms cubic-bezier(0.4, 0, 0.2, 1) forwards`;
+    setTimeout(() => {
+      this.overlay.style.display = "none";
+      this.panel.style.display = "none";
+      document.body.style.overflow = "auto";
+      this._isOpen = false;
+    }, this._duration);
+  }
 }
 
 // ========== 初始化实例 ==========
