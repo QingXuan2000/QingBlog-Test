@@ -1,9 +1,9 @@
 {
     "blogInfo": {
-        "blogName": "你的博客名称（4字英文）",
+        "blogName": "QingTest",
         "yearOfWriting": 2025,
         "currentYear": 2026,
-        "repositoryName": "你的仓库名称"
+        "repositoryName": "QingBlog-Test"
     },
     "author": {
         "targetAuthor": "QingXuan2000",
@@ -29,7 +29,7 @@
     "buildConfig": {
         "utcOffset": 8,
         "articlesPerPage": 20,
-        "showLoadingAnimation": true
+        "showLoadingAnimation": false
     },
     "friendLinks": [
         {
