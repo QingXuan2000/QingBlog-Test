@@ -138,14 +138,10 @@
 }
 
 .card__header h1 {
-    font-size: var(--article-font-6xl);
+    font-size: var(--article-font-5xl);
     color: var(--text-color);
-    font-weight: 600;
+    font-weight: bold;
     word-break: break-all;
-    margin-top: var(--article-margin-3xl);
-    margin-bottom: var(--article-margin-lg);
-    line-height: var(--article-line-height-lg);
-    scroll-margin-top: calc(var(--nav-height) + 2em);
 }
 
 .card__header h1::before {
@@ -154,7 +150,7 @@
     background: var(--primary-color);
     border-radius: 999rem;
     height: 55%;
-    width: 1vw;
+    width: 2vw;
     top: 50%;
     left: -15px;
     transform: translateY(-50%);
