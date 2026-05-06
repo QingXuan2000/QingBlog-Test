@@ -154,7 +154,7 @@
     background: var(--primary-color);
     border-radius: 999rem;
     height: 55%;
-    width: 5px;
+    width: 1vw;
     top: 50%;
     left: -15px;
     transform: translateY(-50%);
