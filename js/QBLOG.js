@@ -1063,7 +1063,7 @@ class QingBlog {
     if (repositoryName === webHost) {
       return href;
     } else {
-      return `${repositoryName}${href}`;
+      return `/${repositoryName}${href}`;
     }
   }
 
