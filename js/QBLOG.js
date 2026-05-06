@@ -93,10 +93,9 @@ class QingBlog {
   }
 
   async loadConfigs() {
-    const base = this._getBase();
-    this.blogConfig = await this.getConfig(`${base}/blogData/blogConfig.json`);
-    this.pagesConfig = await this.getConfig(`${base}/blogData/pagesConfig.json`);
-    this.themes = await this.getConfig(`${base}/blogData/themes.json`);
+    this.blogConfig = await this.getConfig(`../blogData/blogConfig.json`);
+    this.pagesConfig = await this.getConfig(`../blogData/pagesConfig.json`);
+    this.themes = await this.getConfig(`../blogData/themes.json`);
 
     // 防抖导航栏高度更新
     this.debounceSetNavHeight = this.debounce(() => this.setNavHeightVariable());
