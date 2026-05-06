@@ -1,9 +1,15 @@
 {
     "blogInfo": {
-        "blogName": "QingTest",
+        "blogName": "QingBlog",
         "yearOfWriting": 2025,
         "currentYear": 2026,
-        "repositoryName": "QingBlog-Test"
+        "repositoryName": "Qing-Test",
+        "siteEstablishmentDate": "2026-05-04T00:00:00Z",
+        "blogStatistics": {
+            "blogArticleWordCount": 0,
+            "blogArticleCount": 0,
+            "blogLastActivity": ""
+        }
     },
     "author": {
         "targetAuthor": "QingXuan2000",
@@ -29,7 +35,7 @@
     "buildConfig": {
         "utcOffset": 8,
         "articlesPerPage": 20,
-        "showLoadingAnimation": false
+        "showLoadingAnimation": true
     },
     "friendLinks": [
         {
@@ -50,4 +56,3 @@
         "sitemapUrl": "Sitemap完整URL"
     }
 }
-
