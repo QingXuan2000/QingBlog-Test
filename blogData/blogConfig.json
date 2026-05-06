@@ -6,9 +6,9 @@
         "repositoryName": "Qing-Test",
         "siteEstablishmentDate": "2026-05-04T00:00:00Z",
         "blogStatistics": {
-            "blogArticleWordCount": 0,
-            "blogArticleCount": 0,
-            "blogLastActivity": ""
+            "blogArticleWordCount": 11,
+            "blogArticleCount": 1,
+            "blogLastActivity": "2026年05月06日 18:18"
         }
     },
     "author": {
@@ -42,7 +42,7 @@
             "name": "示例博客",
             "description": "这里是博客的描述文字",
             "url": "https://example.com",
-            "icon": "<img src=\"https:\/\/example.com\/favicon.ico\" alt=\"示例图片\" />"
+            "icon": "<img src=\"https://example.com/favicon.ico\" alt=\"示例图片\" />"
         }
     ],
     "robotsConfig": {
